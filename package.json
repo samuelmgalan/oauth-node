@@ -1,0 +1,20 @@
+{
+  "name": "oauth-node",
+  "version": "0.0.1",
+  "description": "OAuth2 for ErizzoCreations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ErizzoCreations",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.0",
+    "cookie-session": "^1.2.0",
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
+    "mongoose": "^4.1.7",
+    "morgan": "^1.6.1",
+    "oauth2-server": "^2.4.1"
+  }
+}
