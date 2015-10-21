@@ -1,19 +1,23 @@
 /*
 YA voy pillando la cosa. El index -> session -> account es para el usuario
-Para el cliente voy por hacer GET a /oauth/authorise?client_id=1234&redirect_uri=http://localhost:3000/secret y darle a AUTHORISE
-La uri tiene que ser la misma con la que se registró el cliente.
+AHORA MISMO FUNCIONA: Al darle a authorise, redirectUri tiene que ser una ruta que haga un POST (*) a /oauth/token con
+client_id, client_secret, grant_type (authorization_code) y code (el authCode que devuelve el authorise).
+La respuesta es del tipo: 
+  {
+    token_type: "bearer"
+    access_token: "6d9d1373a1a02c6b219fc7f0beeb9cd719cf00ef"
+    expires_in: 3600
+    refresh_token: "dd570447164c2bb84ee3f6c9cfcff07548e79140"
+  }
 
-EN REALIDAD lo estoy haciendo mal. El Auth Token es momentáneo. Debo conseguir luego un accessToken
-http://stackoverflow.com/questions/8666316/facebook-oauth-2-0-code-and-token
+Guardar la info. Y cualquier llamada en la que incluya como middleware oauth.authorise() hay que añadir como parámetros
+el access_token (ya sea GET o POST)
 
-TODO: Cambiar el código de authorise. El caso es que cuanto tenga un auth token, llamar a oauth/token para conseguir 
-el access token. FIJO!
+(*) http://stackoverflow.com/questions/17612695/expressjs-how-to-redirect-a-post-request-with-parameters
 
-Añadir un campo al registro de usuarios para saber a qué app pertenece
-
-
-AHORA MISMO: Redirijo a /oauth/authorise otra vez. Preparar un POST con el authCode, client_id y quizás client_secret.
-Y ver qué pasa.
+Cuando expira el accessToken hay que conseguir uno nuevo a partir del refreshToken. Es un POST a /oauth/token con 
+client_id, client_secret, grant_type (refresh_token) y refresh_token (el guardado la última vez). La respuesta es
+igual que se consigue para el accessToken.
 */
 
 
@@ -100,7 +104,7 @@ app.post('/login', function (req, res, next) {
     if (err)
       return next(err);
     if (user) {
-      if (user.email !== 'smendez@erizzocreations.com') {
+      if (user.email !== 'smendez@erizzo.es') {
         res.render('login', {
           redirect: req.query.redirect,
           client_id: req.query.client_id,
@@ -155,8 +159,8 @@ app.post('/session', function (req, res, next) {
 
 app.get('/secret', app.oauth.authorise(), function (req, res) {
   // Will require a valid access_token
-  req.session.authCode = req.query.code;
-  res.send('Secret Area. AuthCode=' + req.session.authCode);
+  req.session.accessToken = req.query.access_token;
+  res.send('Secret Area. AccessToken=' + req.session.accessToken);
 });
 
 app.get('/public', function (req, res) {
